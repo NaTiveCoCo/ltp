@@ -1,0 +1,26 @@
+metric	value	source
+campaign_id	20260824T013104Z-firemarshal-qemu-br-crun-ltp-0	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/
+campaign_window_utc	2026-08-22 through 2026-08-24	campaign result directories listed below
+platform	firemarshal:qemu	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/timing.tsv
+image	br:crun-ltp	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/timing.tsv
+runtest	runtest/syscalls	ltp/runtest/syscalls
+full_runtest_syscalls_entries	1506	results/20260822T034337Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-summary.tsv
+historical_full_pass	1301	results/20260822T034337Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-summary.tsv
+readahead02_recovery_pass	1	results/20260822T051305Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-results.tsv
+environment_recovery_pass	14	results/20260823T153839Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-summary.tsv
+finit_module02_stdio_pass	1	results/20260823T234709Z-firemarshal-qemu-br-crun-ltp-0/ltp-qemu-shards/shard-0000/uartlog
+scheduler_profile_pass	3	results/20260823T235936Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-results.tsv
+loop_partition_pass	2	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-results.tsv
+cumulative_pass	1322	entry-results.tsv
+residual_nonpass	184	nonpass-details.tsv
+tconf	179	nonpass-details.tsv
+tfail	5	nonpass-details.tsv
+retry_policy	PASS entries are excluded from later retries	user_directive
+qemu_commit	a8eec0c5e38060dba24c8f4fb43299b3365835a7	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/qemu-provenance.txt
+qemu_version	9.2.0	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/qemu-provenance.txt
+kernel_commit	67bc4513761f09952a5d5f5c899630ed91ce6442	project linux submodule pin
+runtime	crun 1.12 at ce429cb2e277d001c2179df1ac66a470f00802ae	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/qemu-provenance.txt
+ltp_source_at_final_retry	fda3ad4b35df53cd3bf17e30e8a44eb7375b4fc7	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/qemu-provenance.txt
+ltp_loop_cleanup_commit	5d37df81014b2e29e63e75baba90f63c2c8252bc	ltp nacc-container-coverage branch
+qemu_vcpus_per_instance	1	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-cumulative-summary.tsv
+network	container network namespace with loopback only	results/20260824T013104Z-firemarshal-qemu-br-crun-ltp-0/nacc-ltp-crun-cumulative-summary.tsv
