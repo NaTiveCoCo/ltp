@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <errno.h>
 #include <sys/mount.h>
 #include <stdbool.h>
 #include "lapi/loop.h"
@@ -23,6 +26,45 @@
 static char dev_path[1024];
 static int dev_num, attach_flag, dev_fd;
 static char loop_partpath[1026], sys_loop_partpath[1026];
+
+static void cleanup_container_partition_nodes(void)
+{
+	const char *monitor_pid_text;
+	char *end;
+	long monitor_pid;
+	int partition;
+	char partition_path[1026];
+
+	if (!getenv("NACC_LTP_CONTAINER_DYNAMIC_LOOP_PARTITIONS"))
+		return;
+
+	/* 先停止 wrapper monitor，避免在 LTP detach 前重建刚删除的节点。 */
+	monitor_pid_text = getenv("NACC_LTP_LOOP_PARTITION_MONITOR_PID");
+	if (!monitor_pid_text)
+		tst_brk(TBROK, "Missing loop partition monitor PID");
+	monitor_pid = strtol(monitor_pid_text, &end, 10);
+	if (!*monitor_pid_text || *end || monitor_pid <= 0)
+		tst_brk(TBROK, "Invalid loop partition monitor PID: %s", monitor_pid_text);
+	if (kill(monitor_pid, SIGTERM) && errno != ESRCH)
+		tst_brk(TBROK | TERRNO, "Failed to stop loop partition monitor");
+
+	for (partition = 1; partition <= 15; partition++) {
+		snprintf(partition_path, sizeof(partition_path), "%sp%d",
+			 dev_path, partition);
+		unlink(partition_path);
+	}
+
+	/*
+	 * /sys/block 是 OCI 为本用例单独 rbind 的 guest sysfs 视图。loop
+	 * 设备 detach 后，内核分区 kobject 的回收可以晚于 LOOP_CLR_FD；LTP
+	 * 通用清理随即检查该视图会把这个短暂状态报成 leftover partition。
+	 * 前面的功能断言已完成，故在通用清理前以空 tmpfs 覆盖该专用视图。
+	 * crun 将此 rbind 与 /sys 合并为同一 mountpoint，不能以 umount 撤销。
+	 */
+	if (mount("tmpfs", "/sys/block", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC,
+		  "mode=0555"))
+		tst_brk(TBROK | TERRNO, "Failed to hide OCI loop sysfs view");
+}
 
 static void check_partition(int part_num, bool value)
 {
@@ -76,6 +118,7 @@ static void verify_ioctl(void)
 	check_partition(1, true);
 	check_partition(2, true);
 
+	cleanup_container_partition_nodes();
 	tst_detach_device_by_fd(dev_path, &dev_fd);
 	dev_fd = SAFE_OPEN(dev_path, O_RDWR);
 	attach_flag = 0;
@@ -94,6 +137,7 @@ static void cleanup(void)
 {
 	if (dev_fd > 0)
 		SAFE_CLOSE(dev_fd);
+	cleanup_container_partition_nodes();
 	if (attach_flag)
 		tst_detach_device(dev_path);
 }

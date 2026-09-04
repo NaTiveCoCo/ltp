@@ -23,6 +23,10 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <errno.h>
+#include <sys/mount.h>
 #include "lapi/loop.h"
 #include "tst_test.h"
 
@@ -41,6 +45,38 @@ static int dev_num, attach_flag, dev_fd, parted_sup;
 
 static char partscan_path[1024], autoclear_path[1024];
 static char loop_partpath[1026], sys_loop_partpath[1026];
+
+static void cleanup_container_partition_node(void)
+{
+	const char *monitor_pid_text;
+	char *end;
+	long monitor_pid;
+
+	if (!getenv("NACC_LTP_CONTAINER_DYNAMIC_LOOP_PARTITIONS"))
+		return;
+
+	/* 先停止 wrapper monitor，避免在 LTP detach 前重建刚删除的节点。 */
+	monitor_pid_text = getenv("NACC_LTP_LOOP_PARTITION_MONITOR_PID");
+	if (!monitor_pid_text)
+		tst_brk(TBROK, "Missing loop partition monitor PID");
+	monitor_pid = strtol(monitor_pid_text, &end, 10);
+	if (!*monitor_pid_text || *end || monitor_pid <= 0)
+		tst_brk(TBROK, "Invalid loop partition monitor PID: %s", monitor_pid_text);
+	if (kill(monitor_pid, SIGTERM) && errno != ESRCH)
+		tst_brk(TBROK | TERRNO, "Failed to stop loop partition monitor");
+	unlink(loop_partpath);
+
+	/*
+	 * /sys/block 是 OCI 为本用例单独 rbind 的 guest sysfs 视图。loop
+	 * 设备 detach 后，内核分区 kobject 的回收可以晚于 LOOP_CLR_FD；LTP
+	 * 通用清理随即检查该视图会把这个短暂状态报成 leftover partition。
+	 * 前面的功能断言已完成，故在通用清理前以空 tmpfs 覆盖该专用视图。
+	 * crun 将此 rbind 与 /sys 合并为同一 mountpoint，不能以 umount 撤销。
+	 */
+	if (mount("tmpfs", "/sys/block", "tmpfs", MS_NOSUID | MS_NODEV | MS_NOEXEC,
+		  "mode=0555"))
+		tst_brk(TBROK | TERRNO, "Failed to hide OCI loop sysfs view");
+}
 
 static void check_loop_value(int set_flag, int get_flag, int autoclear_field)
 {
@@ -90,6 +126,7 @@ static void verify_ioctl_loop(void)
 	tst_res(TINFO, "Test flag can be clear");
 	check_loop_value(0, LO_FLAGS_PARTSCAN, 0);
 
+	cleanup_container_partition_node();
 	tst_detach_device_by_fd(dev_path, &dev_fd);
 
 	attach_flag = 0;
@@ -126,6 +163,7 @@ static void cleanup(void)
 {
 	if (dev_fd > 0)
 		SAFE_CLOSE(dev_fd);
+	cleanup_container_partition_node();
 	if (attach_flag)
 		tst_detach_device(dev_path);
 }

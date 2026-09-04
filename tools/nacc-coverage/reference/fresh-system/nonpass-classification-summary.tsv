@@ -1,0 +1,14 @@
+entry_count	outcome	classification	disposition	documentation_url
+88	TCONF	architecture_limit	record_platform_limit	https://docs.kernel.org/arch/riscv/index.html
+32	TCONF	feature_or_policy_limit	inspect_feature_support	https://docs.kernel.org/arch/riscv/index.html
+26	TCONF	kernel_version_limit	record_platform_limit	https://docs.kernel.org/
+15	TCONF	topology_limit	record_platform_limit	https://docs.kernel.org/mm/numa.html
+7	TCONF	feature_or_policy_limit	inspect_feature_support	https://docs.kernel.org/mm/numa.html
+6	TCONF	kernel_config_or_policy	inspect_kernel_or_guest_setup	https://docs.kernel.org/kbuild/kconfig.html
+4	TCONF	feature_or_policy_limit	inspect_feature_support	https://docs.kernel.org/userspace-api/landlock.html
+1	TCONF	device_or_service	record_platform_limit	https://docs.kernel.org/admin-guide/nfs/nfsd-admin-interfaces.html
+1	TFAIL	container_pid_namespace	retained_isolation_limit	https://github.com/torvalds/linux/blob/v6.6/kernel/pid_namespace.c#L319-L343
+1	TFAIL	kernel_filesystem_semantics	requires_kernel_or_filesystem_investigation	https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c45beebfde34
+1	TFAIL	kernel_regression	requires_kernel_fix_or_backport	https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=39705a6c29f8
+1	TFAIL	kernel_regression	requires_kernel_fix_or_backport	https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d80b065bb172
+1	TFAIL	kernel_regression	requires_kernel_fix_or_backport	https://lore.kernel.org/all/20240222215930.14637-2-vbabka@suse.cz/
